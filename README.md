@@ -1,0 +1,2 @@
+# Descarga-mp3-yt
+# YouTube to MP3 Downloader   Este script en Python permite descargar el audio de cualquier video público de YouTube y convertirlo automáticamente a formato MP3.  ## Características -  Descarga el audio en la mejor calidad disponible -  Conversión automática a formato `.mp3` -  Interfaz por consola simple e intuitiva -  Limpieza automática de archivos temporales  ## Requisitos - Python 3.7+ - ffmpeg (opcional si usas moviepy correctamente)  ## Instalación ```bash pip install pytube moviepy
