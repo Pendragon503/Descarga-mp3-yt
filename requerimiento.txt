@@ -1,0 +1,78 @@
+===========================================
+ REQUISITOS PARA USAR DESCARGADOR DE AUDIO
+===========================================
+
+📌 SISTEMA NECESARIO
+--------------------
+- Windows 10 o superior (64 bits)
+- Conexión a Internet
+- Espacio libre mínimo: 200 MB
+- Permisos de administrador
+
+-------------------------------------------
+ PASO 1: INSTALAR PYTHON
+-------------------------------------------
+1. Ir a: https://www.python.org/downloads/
+2. Descargar la versión más reciente de Python 3.x
+3. Durante la instalación, marcar:
+   [x] Add Python to PATH
+4. Luego clic en "Install Now"
+5. Verificar instalación:
+   Abrir CMD y escribir:
+   python --version
+   Debe mostrar algo como: Python 3.12.2
+
+-------------------------------------------
+ PASO 2: INSTALAR FFMPEG
+-------------------------------------------
+1. Entrar a: https://www.gyan.dev/ffmpeg/builds/
+2. Descargar:
+   "ffmpeg-release-essentials.zip"
+3. Descomprimir la carpeta en:
+   C:\ffmpeg
+4. Agregar al PATH:
+   - Copiar ruta: C:\ffmpeg\bin
+   - En Windows buscar "Editar variables de entorno"
+   - En Variables del sistema -> Path -> Editar -> Nuevo -> pegar la ruta
+5. Verificar instalación:
+   ffmpeg -version
+   Si aparece información, está correcto.
+
+-------------------------------------------
+ PASO 3: INSTALAR DEPENDENCIAS DE PYTHON
+-------------------------------------------
+1. Abrir CMD (símbolo del sistema)
+2. Ejecutar:
+   pip install yt-dlp tkinter
+
+-------------------------------------------
+ PASO 4: EJECUTAR EL SCRIPT
+-------------------------------------------
+1. Guardar el archivo del script (descargar_audio.py)
+   por ejemplo en:
+   C:\youtube_audio\descargar_audio.py
+
+2. Abrir CMD y entrar en la carpeta:
+   cd C:\youtube_audio
+
+3. Ejecutar:
+   python descargar_audio.py
+
+4. Cuando pida:
+   🔗 Ingresa el enlace del video de YouTube
+
+5. Seleccionar carpeta destino.
+
+-------------------------------------------
+ PASO 5: VERIFICACIÓN
+-------------------------------------------
+- Se creará el archivo MP3 en la carpeta elegida.
+- Si hubo fallos, se genera "errores.txt".
+
+-------------------------------------------
+ NOTA
+-------------------------------------------
+No cierres la ventana del programa mientras descarga.
+El proceso puede tardar según la duración del video y tu conexión.
+
+===========================================
