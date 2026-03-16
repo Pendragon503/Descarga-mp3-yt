@@ -10,7 +10,7 @@ def sanitize_filename(name: str) -> str:
     """Remove characters not allowed in filenames on Windows/most OSes."""
     return re.sub(r'[<>:"/\\|?*\n\r]+', '', name).strip()
 
-def descargar_audio(busqueda_o_url, carpeta_destino, log_callback, progress_callback, total_callback):
+def descargar_audio(busqueda_o_url, carpeta_destino, log_callback, progress_callback, total_callback, final_callback):
     try:
         # Detectar si es una URL
         es_url = busqueda_o_url.startswith(('http://', 'https://'))
@@ -56,9 +56,11 @@ def descargar_audio(busqueda_o_url, carpeta_destino, log_callback, progress_call
             ydl.download([busqueda_o_url] if es_url else [f"ytsearch1:{busqueda_o_url}"])
 
         log_callback(f"✅ Descarga completada.")
+        final_callback()
 
     except Exception as e:
         log_callback(f"❌ Error al procesar '{busqueda_o_url}': {e}")
+        final_callback()
 
 
 class DescargadorApp:
@@ -119,7 +121,8 @@ class DescargadorApp:
         # Botones
         frame_botones = ttk.Frame(main_frame)
         frame_botones.pack(pady=10)
-        ttk.Button(frame_botones, text="Iniciar Descarga", command=self.iniciar_descarga).pack(side=tk.LEFT, padx=10)
+        self.btn_descarga = ttk.Button(frame_botones, text="Iniciar Descarga", command=self.iniciar_descarga)
+        self.btn_descarga.pack(side=tk.LEFT, padx=10)
         ttk.Button(frame_botones, text="Limpiar Logs", command=self.limpiar_logs).pack(side=tk.LEFT, padx=10)
 
         # Logs
@@ -128,7 +131,7 @@ class DescargadorApp:
         self.log_text.pack(pady=5, fill=tk.BOTH, expand=True)
 
         # Creador
-        ttk.Label(main_frame, text="Desarrollado por Sopor", font=("Arial", 8, "italic")).pack(pady=5)
+        ttk.Label(main_frame, text="Desarrollado por Pendragon503", font=("Arial", 8, "italic")).pack(pady=5)
 
         self.modo.trace("w", self.cambiar_modo)
         self.cambiar_modo()
@@ -163,10 +166,10 @@ class DescargadorApp:
         self.progressbar['value'] = 0
 
     def progress_callback(self, d):
-        if d['status'] == 'finished':
+        if 'postprocessor' in d and d['status'] == 'finished':
             self.descargadas += 1
             self.progressbar['value'] = self.descargadas
-            self.log(f"✅ Completado: {d.get('filename', '')}")
+            self.log(f"✅ Completado: {d.get('info_dict', {}).get('title', 'Desconocido')}")
         elif d['status'] == 'downloading':
             self.log(f"⬇️ Descargando: {d.get('filename', '')} - {d.get('_percent_str', '0%')}")
 
@@ -178,22 +181,29 @@ class DescargadorApp:
             messagebox.showerror("Error", "Selecciona una carpeta de destino.")
             return
 
+        self.btn_descarga.config(text="Descargando...", state="disabled")
+        self.descargadas = 0
+        self.progressbar['value'] = 0
+        final_callback = lambda: self.btn_descarga.config(text="Iniciar Descarga", state="normal")
+
         if self.modo.get() == "manual":
             busqueda = self.entry_busqueda.get().strip()
             if not busqueda:
                 messagebox.showerror("Error", "Ingresa una URL o búsqueda.")
+                self.btn_descarga.config(text="Iniciar Descarga", state="normal")
                 return
-            threading.Thread(target=self.descargar_manual, args=(busqueda,)).start()
+            threading.Thread(target=self.descargar_manual, args=(busqueda, final_callback)).start()
         else:
             if not self.archivo_txt:
                 messagebox.showerror("Error", "Selecciona un archivo TXT.")
+                self.btn_descarga.config(text="Iniciar Descarga", state="normal")
                 return
-            threading.Thread(target=self.descargar_txt).start()
+            threading.Thread(target=self.descargar_txt, args=(final_callback,)).start()
 
-    def descargar_manual(self, busqueda):
-        descargar_audio(busqueda, self.carpeta_destino, self.log, self.progress_callback, self.total_callback)
+    def descargar_manual(self, busqueda, final_callback):
+        descargar_audio(busqueda, self.carpeta_destino, self.log, self.progress_callback, self.total_callback, final_callback)
 
-    def descargar_txt(self):
+    def descargar_txt(self, final_callback):
         try:
             with open(self.archivo_txt, "r", encoding="utf-8") as f:
                 lineas = f.readlines()
@@ -209,13 +219,15 @@ class DescargadorApp:
                         artista = partes[0].strip()
                         cancion = partes[1].strip()
                         busqueda = f"{artista} {cancion}"
-                        descargar_audio(busqueda, self.carpeta_destino, self.log, self.progress_callback, lambda x: None)  # No cambiar total aquí
+                        descargar_audio(busqueda, self.carpeta_destino, self.log, self.progress_callback, lambda x: None, lambda: None)  # No cambiar total aquí
                     except Exception as e:
                         self.log(f"❌ No se pudo procesar la línea: {linea} - {e}")
                 elif linea:
-                    descargar_audio(linea, self.carpeta_destino, self.log, self.progress_callback, lambda x: None)
+                    descargar_audio(linea, self.carpeta_destino, self.log, self.progress_callback, lambda x: None, lambda: None)
+            final_callback()
         except Exception as e:
             self.log(f"❌ Error al leer el archivo TXT: {e}")
+            final_callback()
 
 
 if __name__ == "__main__":
