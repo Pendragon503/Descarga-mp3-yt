@@ -64,13 +64,24 @@ echo [2/6] Version de Python:
 %PYEXE% --version
 
 echo.
-echo [3/6] Instalando/actualizando pip y yt-dlp...
+echo [3/6] Instalando/actualizando pip y dependencias de Python...
+echo     - pip (gestor de paquetes)
+echo     - yt-dlp (descargador de YouTube)
+echo.
 %PYEXE% -m pip install --upgrade pip
 if %errorlevel% NEQ 0 echo Aviso: no se pudo actualizar pip y se continuara.
+
+echo Instalando yt-dlp...
 %PYEXE% -m pip install --upgrade yt-dlp
 if %errorlevel% NEQ 0 (
   echo Error: no se pudo instalar yt-dlp.
   goto :end_fail
+)
+
+echo Verificando que tkinter esta disponible (incluido en Python)...
+%PYEXE% -c "import tkinter" >nul 2>&1
+if %errorlevel% NEQ 0 (
+  echo Aviso: tkinter puede no estar disponible. Intenta reinstalar Python con tcl/tk incluido.
 )
 
 echo.
